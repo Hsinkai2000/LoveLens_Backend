@@ -6,23 +6,9 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-const {getFirestore} = require("firebase/firestore");
-const {initializeApp} = require("firebase/app");
 const {getAuth} = require("firebase/auth");
-
-const config = {
-    apiKey: "AIzaSyAwWVxIZwlqyLVRN9hZi1Lv6AqiyFrHTtw",
-    authDomain: "lovelens-535bc.firebaseapp.com",
-    databaseURL: "https://lovelens-535bc-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "lovelens-535bc",
-    storageBucket: "lovelens-535bc.appspot.com",
-    messagingSenderId: "656169376737",
-    appId: "1:656169376737:web:efa1d46b9ad3e77b3c10a0",
-    measurementId: "G-ZSHVYCEXL1"
-  };
-
-const fapp = initializeApp(config);
-const auth = getAuth(fapp);
+const fbAuth = require("./controller/fbAuth.js");
+const {firebase, admin} = require("./config/fbConfig.js");
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://hsinkai2000:ouMHyb472VNMLHM4@sweetvows.no0xjef.mongodb.net/?retryWrites=true&w=majority&appName=SweetVows";
@@ -64,6 +50,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 // app.use("/api/register", require("./routes/api/register.js"));
 app.use("/api/login", require("./routes/api/login.js"));
+app.use("/api/createroom", require("./routes/api/create_room.js"));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -80,5 +67,35 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+function print (path, layer) {
+  if (layer.route) {
+    layer.route.stack.forEach(print.bind(null, path.concat(split(layer.route.path))))
+  } else if (layer.name === 'router' && layer.handle.stack) {
+    layer.handle.stack.forEach(print.bind(null, path.concat(split(layer.regexp))))
+  } else if (layer.method) {
+    console.log('%s /%s',
+      layer.method.toUpperCase(),
+      path.concat(split(layer.regexp)).filter(Boolean).join('/'))
+  }
+}
+
+function split (thing) {
+  if (typeof thing === 'string') {
+    return thing.split('/')
+  } else if (thing.fast_slash) {
+    return ''
+  } else {
+    var match = thing.toString()
+      .replace('\\/?', '')
+      .replace('(?=\\/|$)', '$')
+      .match(/^\/\^((?:\\[.*+?^${}()|[\]\\\/]|[^.*+?^${}()|[\]\\\/])*)\$\//)
+    return match
+      ? match[1].replace(/\\(.)/g, '$1').split('/')
+      : '<complex:' + thing.toString() + '>'
+  }
+}
+
+app._router.stack.forEach(print.bind(null, []))
 
 module.exports = app;
