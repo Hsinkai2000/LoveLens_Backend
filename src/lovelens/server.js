@@ -12,7 +12,7 @@ const {firebase, admin} = require("./config/fbConfig.js");
 const mongoose = require("mongoose");
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://hsinkai2000:ouMHyb472VNMLHM4@sweetvows.no0xjef.mongodb.net/?retryWrites=true&w=majority&appName=SweetVows";
+const uri = "mongodb+srv://hsinkai2000:ouMHyb472VNMLHM4@sweetvows.no0xjef.mongodb.net/LoveLens?retryWrites=true&w=majority&appName=SweetVows";
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
