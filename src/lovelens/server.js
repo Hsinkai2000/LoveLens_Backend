@@ -9,9 +9,10 @@ var usersRouter = require('./routes/users');
 const {getAuth} = require("firebase/auth");
 const fbAuth = require("./controller/fbAuth.js");
 const {firebase, admin} = require("./config/fbConfig.js");
+const mongoose = require("mongoose");
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://hsinkai2000:ouMHyb472VNMLHM4@sweetvows.no0xjef.mongodb.net/?retryWrites=true&w=majority&appName=SweetVows";
+const uri = "mongodb+srv://hsinkai2000:ouMHyb472VNMLHM4@sweetvows.no0xjef.mongodb.net/?retryWrites=true&w=majority&appName=SweetVows&authSource=LoveLens";
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -23,7 +24,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    await mongoose.connect(uri);
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
