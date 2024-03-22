@@ -52,6 +52,7 @@ app.use('/users', usersRouter);
 // app.use("/api/register", require("./routes/api/register.js"));
 app.use("/api/login", require("./routes/api/login.js"));
 app.use("/api/room/create", require("./routes/api/room/create.js"));
+app.use("/api/sendimage", require("./routes/api/room/sendimage.js"));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
