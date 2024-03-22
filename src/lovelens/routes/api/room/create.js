@@ -6,7 +6,6 @@ const {
   createUserWithEmailAndPassword,
   verifyIdToken,
 } = require("firebase/auth");
-var { verifyID } = require("../../../controller/fbAuth.js");
 const fbAuth = require("../../../controller/fbAuth.js");
 const Rooms = require("../../../models/room_schema.js");
 const auth = getAuth();

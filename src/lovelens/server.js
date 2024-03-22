@@ -9,31 +9,12 @@ var usersRouter = require('./routes/users');
 const {getAuth} = require("firebase/auth");
 const fbAuth = require("./controller/fbAuth.js");
 const {firebase, admin} = require("./config/fbConfig.js");
-const mongoose = require("mongoose");
+const { mongooseRun } = require('./config/mongoConfig.js');
+const { roomRoutes } = require('./routes/api/room/room_routes.js');
+const {setRoutes} = require('./routes_main.js');
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://hsinkai2000:ouMHyb472VNMLHM4@sweetvows.no0xjef.mongodb.net/LoveLens?retryWrites=true&w=majority&appName=SweetVows";
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await mongoose.connect(uri);
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
+mongooseRun().catch(console.dir);
+
 
 var app = express();
 
@@ -47,11 +28,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-// app.use("/api/register", require("./routes/api/register.js"));
-app.use("/api/login", require("./routes/api/login.js"));
-app.use("/api/room/create", require("./routes/api/room/create.js"));
+setRoutes(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
