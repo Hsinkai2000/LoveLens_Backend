@@ -5,9 +5,10 @@ var { verifyID } = require('../../../controller/fbAuth.js');
 const fbAuth = require('../../../controller/fbAuth.js');
 const Images = require('../../../models/image_schema.js');
 const { firebase } = require('../../../config/fbConfig.js');
-const { ref, getStorage } = require('firebase/storage');
+const { ref, getStorage, uploadBytes } = require('firebase/storage');
 const auth = getAuth();
 var multer = require('multer');
+const path = require('path');
 // var upload = multer({
 //     dest: './routes/api/room/uploads/',
 //     filename: file.originalname
@@ -34,29 +35,37 @@ router.post(
     '/',
     fbAuth,
     upload.single('image'),
-    function async(req, res, next) {
+    async function (req, res, next) {
         // var { image } = req.file;
-        console.log('here');
-        var response = '<a href="/">Home</a><br>';
-        response += 'Files uploaded successfully.<br>';
-        response += `<img src="${req.file.path}" /><br>`;
-        //return res.send(response);
-
-        const selectedFile = req.file;
-
         const storage = getStorage();
-        const fileRef = ref(storage, req.file.path);
-        console.log("Fileref: " + fileRef)
+        const fileRef = ref(storage, 'pictures/' + req.file.originalname);
+        const metaData = {
+            contentType: req.file.mimetype
+        };
 
-        fileRef.put(selectedFile).then((snapshot) => {
-          snapshot.ref.getDownloadURL().then((downloadURL) => {
-            console.log(downloadURL);
-            setImgUrl(downloadURL);
-          });
+        const fs = require('fs');
+
+        const imagePath = path.join('upload/', req.file.originalname); // Replace with your image path
+        console.log(imagePath);
+        fs.readFile(imagePath, async (err, data) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+
+            // Convert the file data to a Blob object
+            const blob = new Blob([data], { type: 'image/png' }); // Replace 'image/png' with the correct image type
+
+            try {
+                await uploadBytes(fileRef, blob, metaData);
+                res.status(200).json({ image: req.file.originalname });
+            } catch (error) {
+                res.status(500).json({ erorr: error.message });
+            }
+
+            // Use the blob for further processing (e.g., upload to Firebase Storage)
+            // ...
         });
-
-        return "into firebase liao"
-
 
         // const selectedFile = image;
         // const storage = getStorage();
