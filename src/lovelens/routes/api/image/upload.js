@@ -1,21 +1,19 @@
 var express = require('express');
 var router = express.Router();
-const { getAuth, verifyIdToken } = require('firebase/auth');
-var { verifyID } = require('../../../controller/fbAuth.js');
+const mongoose = require('mongoose');
 const fbAuth = require('../../../controller/fbAuth.js');
-const Images = require('../../../models/image_schema.js');
-const { firebase } = require('../../../config/fbConfig.js');
 const {
     ref,
     getStorage,
     uploadBytes,
     getDownloadURL
 } = require('firebase/storage');
-const auth = getAuth();
 var fs = require('fs');
 var multer = require('multer');
 const path = require('path');
-const { matchedData } = require('express-validator');
+const Image = require('../../../models/image_schema.js');
+const Room = require('../../../models/room_schema.js');
+const { updatePassword } = require('firebase/auth');
 
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -45,21 +43,33 @@ const readFile = (imagePath, fileRef, metaData) => {
         });
     });
 };
-const handle_upload = async (req, res, fileRef) => {
-    const metaData = {
-        contentType: req.file.mimetype
-    };
-    const imagePath = path.join('upload/', req.file.originalname);
+const handleFBupload = (metaData, imagePath, fileRef) => {
+    return new Promise((resolve, reject) => {
+        readFile(imagePath, fileRef, metaData)
+            .then(() => resolve())
+            .catch(reject);
+    });
+};
 
-    try {
-        return new Promise((resolve, reject) => {
-            readFile(imagePath, fileRef, metaData)
-                .then(() => resolve())
-                .catch(reject);
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+const handleMongoImageURLUpload = (downloadURL, roomId) => {
+    return new Promise((resolve, reject) => {
+        const image = new Image({ imageURL: downloadURL });
+        image
+            .save()
+            .then(async (image) => {
+                var imageID = image._id;
+                var room = await Room.findById(roomId).exec();
+                var updateParams = {
+                    num_of_pics: room.num_of_pics + 1,
+                    $push: { pictures: imageID }
+                };
+                var updateRoom = Room.findByIdAndUpdate(roomId, updateParams, {
+                    new: true
+                });
+                resolve(updateRoom.exec());
+            })
+            .catch(reject);
+    });
 };
 
 router.post(
@@ -67,11 +77,21 @@ router.post(
     fbAuth,
     upload.single('image'),
     async function (req, res, next) {
+        const { roomId } = req.body;
+        const metaData = {
+            contentType: req.file.mimetype
+        };
+        const imagePath = path.join('upload/', req.file.originalname);
         const storage = getStorage();
         const fileRef = ref(storage, 'pictures/' + req.file.originalname);
-        await handle_upload(req, res, fileRef);
-        const p = await getDownloadURL(fileRef);
-        res.status(200).json({ url: p });
+        try {
+            await handleFBupload(metaData, imagePath, fileRef);
+            const imageURL = await getDownloadURL(fileRef);
+            var room = await handleMongoImageURLUpload(imageURL, roomId);
+            res.status(200).json({ imageURL: imageURL, room: room });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     }
 );
 
