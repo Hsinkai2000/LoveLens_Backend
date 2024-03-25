@@ -8,6 +8,7 @@ const setRoutes = (app) => {
     app.use('/', indexRouter);
     app.use('/users', usersRouter);
     app.use('/api/login', require('./routes/api/login.js'));
+    app.use('/api/image/upload', require('./routes/api/image/upload.js'));
     roomRoutes(app);
 };
 
