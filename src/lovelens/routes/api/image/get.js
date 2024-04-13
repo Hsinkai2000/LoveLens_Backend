@@ -9,7 +9,6 @@ const getRoom = async (room_code) => {
         var rooms = Room.findOne({ room_code: room_code })
             .exec()
             .then((rooms) => {
-                console.log('room: ' + rooms);
                 resolve(rooms);
             })
             .catch(reject);
@@ -29,7 +28,6 @@ const getPictureUrl = async (pictureID) => {
 
 const convertToUrl = async (pictures) => {
     var urls = [];
-    console.log('pictures2 : ' + pictures);
     try {
         for (pictureID of pictures) {
             var picURL = '';
@@ -38,7 +36,6 @@ const convertToUrl = async (pictures) => {
             } catch (error) {}
             urls.push(picURL);
         }
-        console.log('urls : ' + urls);
         return urls;
     } catch (error) {}
 };
@@ -47,10 +44,8 @@ router.get('/', async function (req, res, next) {
     const { room_code } = req.body;
 
     try {
-        console.log('roomcode: ' + room_code);
         const room = await getRoom(room_code);
         var { pictures } = room;
-        console.log('pictures : ' + pictures);
         try {
             var pictureURL = await convertToUrl(pictures);
             res.status(200).json({ room: pictureURL });
