@@ -8,7 +8,6 @@ router.get('/:uid', fbAuth, async function (req, res, next) {
         try {
             var uid = req.params.uid;
             const rooms = await Rooms.find().where({ owner: uid });
-            console.log('Rooms: ' + uid);
             res.status(200).json({ rooms: rooms });
         } catch (error) {
             res.status(500).json({ error: error.message });
