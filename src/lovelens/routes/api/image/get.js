@@ -40,10 +40,9 @@ const convertToUrl = async (pictures) => {
     } catch (error) {}
 };
 
-router.get('/', async function (req, res, next) {
-    const { room_code } = req.body;
-
+router.get('/:room_code', async function (req, res, next) {
     try {
+        var room_code = req.params.room_code;
         const room = await getRoom(room_code);
         var { pictures } = room;
         try {
@@ -53,6 +52,7 @@ router.get('/', async function (req, res, next) {
             res.status(500).json({ error: error });
         }
     } catch (error) {
+        console.log('no room found');
         return res.status(500).json({ error: 'no room found' });
     }
 });
