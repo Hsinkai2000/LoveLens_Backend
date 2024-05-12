@@ -28,7 +28,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({ origin: 'http://localhost:3001' }));
+app.use(
+    cors({
+        origin: ['https://sweet-vows.com'],
+        methods: ['POST', 'GET'],
+        credentials: true
+    })
+);
 
 setRoutes(app);
 
