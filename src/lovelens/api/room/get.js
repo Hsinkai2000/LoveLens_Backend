@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const fbAuth = require('../../../controller/fbAuth.js');
-const Rooms = require('../../../models/room_schema.js');
+const fbAuth = require('../../controller/fbAuth.js');
+const Rooms = require('../../models/room_schema.js');
 
 router.get('/:uid', fbAuth, async function (req, res, next) {
     if (req.user) {

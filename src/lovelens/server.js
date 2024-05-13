@@ -13,7 +13,7 @@ const { getAuth } = require('firebase/auth');
 const fbAuth = require('./controller/fbAuth.js');
 const { firebase, admin } = require('./config/fbConfig.js');
 const { mongooseRun } = require('./config/mongoConfig.js');
-const { roomRoutes } = require('./routes/api/room/room_routes.js');
+const { roomRoutes } = require('./api/room/room_routes.js');
 const { setRoutes } = require('./routes_main.js');
 
 mongooseRun().catch(console.dir);

@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
 const mongoose = require('mongoose');
-const Room = require('../../../models/room_schema');
-const Image = require('../../../models/image_schema');
+const Room = require('../../models/room_schema.js');
+const Image = require('../../models/image_schema.js');
 
 const getRoom = async (room_code) => {
     return new Promise((resolve, reject) => {

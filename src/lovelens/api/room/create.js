@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const fbAuth = require('../../../controller/fbAuth.js');
-const Rooms = require('../../../models/room_schema.js');
+const fbAuth = require('../../controller/fbAuth.js');
+const Rooms = require('../../models/room_schema.js');
 
 function getRoomCode() {
     return Math.floor(Math.random() * 9999);

@@ -1,9 +1,9 @@
 var express = require('express');
 var router = express.Router();
-const fbAuth = require('../../../controller/fbAuth.js');
-const Rooms = require('../../../models/room_schema.js');
-const Image = require('../../../models/image_schema.js');
-const Room = require('../../../models/room_schema.js');
+const fbAuth = require('../../controller/fbAuth.js');
+const Rooms = require('../../models/room_schema.js');
+const Image = require('../../models/image_schema.js');
+const Room = require('../../models/room_schema.js');
 
 const deleteImageFromImages = async (imageID) => {
     try {

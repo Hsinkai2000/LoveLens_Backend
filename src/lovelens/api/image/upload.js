@@ -10,8 +10,8 @@ const {
 var fs = require('fs');
 var multer = require('multer');
 const path = require('path');
-const Image = require('../../../models/image_schema.js');
-const Room = require('../../../models/room_schema.js');
+const Image = require('../../models/image_schema.js');
+const Room = require('../../models/room_schema.js');
 const { updatePassword } = require('firebase/auth');
 
 var storage = multer.diskStorage({

@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const fbAuth = require('../../../controller/fbAuth.js');
-const Rooms = require('../../../models/room_schema.js');
+const fbAuth = require('../../controller/fbAuth.js');
+const Rooms = require('../../models/room_schema.js');
 const deleteRoom = async (room_code, userID) => {
     try {
         const room = await Rooms.deleteOne()
