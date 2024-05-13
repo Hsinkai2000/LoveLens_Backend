@@ -7,8 +7,8 @@ var logger = require('morgan');
 
 const bodyParser = require('body-parser');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var indexRouter = require('./api/index');
+var usersRouter = require('./api/users.js');
 const { getAuth } = require('firebase/auth');
 const fbAuth = require('./controller/fbAuth.js');
 const { firebase, admin } = require('./config/fbConfig.js');

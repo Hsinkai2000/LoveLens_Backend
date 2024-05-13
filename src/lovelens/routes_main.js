@@ -1,6 +1,6 @@
 var express = require('express');
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users.js');
+var indexRouter = require('./api/index');
+var usersRouter = require('./api/users.js');
 var loginRouter = require('./routes/api/login.js');
 var { roomRoutes } = require('./routes/api/room/room_routes.js');
 const { imageRoutes } = require('./routes/api/image/image_routes.js');
