@@ -2,10 +2,5 @@
     "version": 2,
     "builds": [{ "src": "*.js", "use": "@vercel/node" }],
 
-    "rewrites": [
-        {
-            "source": "/api/:path*",
-            "destination": "https://api.sweet-vows.com/api/:path*"
-        }
-    ]
+    "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
 }
