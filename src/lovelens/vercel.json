@@ -8,5 +8,10 @@
         }
     ],
 
-    "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "https://api.sweet-vows.com/api/:path*"
+        }
+    ]
 }
