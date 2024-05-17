@@ -60,6 +60,11 @@ const handleMongoImageURLUpload = (downloadURL, room_code) => {
                 var room = await Room.findOne({
                     room_code: room_code
                 }).exec();
+                
+
+                if (room.num_of_pics == null) {
+                    room.num_of_pics = 0;
+                }
                 var updateParams = {
                     num_of_pics: room.num_of_pics + 1,
                     $push: { pictures: imageID }
