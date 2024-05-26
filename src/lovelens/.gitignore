@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-./src/lovelens/node_modules
+/node_modules
 
 # This is if we decide to add testing with Jest
 /coverage

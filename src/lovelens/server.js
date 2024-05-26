@@ -30,7 +30,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(
     cors({
-        origin: ['https://api.sweet-vows.com'],
+        origin: ['https://www.sweet-vows.com'],
         methods: ['POST', 'GET'],
         credentials: true
     })
