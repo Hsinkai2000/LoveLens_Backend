@@ -7,13 +7,13 @@ var logger = require('morgan');
 
 const bodyParser = require('body-parser');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var indexRouter = require('./api/index');
+var usersRouter = require('./api/users.js');
 const { getAuth } = require('firebase/auth');
 const fbAuth = require('./controller/fbAuth.js');
 const { firebase, admin } = require('./config/fbConfig.js');
 const { mongooseRun } = require('./config/mongoConfig.js');
-const { roomRoutes } = require('./routes/api/room/room_routes.js');
+const { roomRoutes } = require('./api/room/room_routes.js');
 const { setRoutes } = require('./routes_main.js');
 
 mongooseRun().catch(console.dir);
@@ -21,14 +21,20 @@ mongooseRun().catch(console.dir);
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+// app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'jade');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({ origin: 'http://localhost:3001' }));
+app.use(
+    cors({
+        origin: ['https://www.sweet-vows.com', 'https://sweet-vows.com'],
+        methods: ['POST', 'GET'],
+        credentials: true
+    })
+);
 
 setRoutes(app);
 
