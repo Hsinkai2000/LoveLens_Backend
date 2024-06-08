@@ -1,10 +1,9 @@
 var express = require('express');
 var router = express.Router();
-const fbAuth = require('../../../controller/fbAuth.js');
-const Rooms = require('../../../models/room_schema.js');
-const Image = require('../../../models/image_schema.js');
+const fbAuth = require('../../config/fbConfig.js');
+const Image = require('../../models/image_schema.js');
 const { getStorage, ref, deleteObject } = require('firebase/storage');
-const Room = require('../../../models/room_schema.js');
+const Room = require('../../models/room_schema.js');
 
 const deleteImageFromMongo = async (imageURL, room_code) => {
     try {
@@ -43,12 +42,13 @@ const deleteImageFromFirebaseStorage = async (imageURL) => {
     }
 };
 
-router.delete('/', fbAuth, async function (req, res, next) {
+router.delete('/', async function (req, res, next) {
     if (req.user) {
         try {
             var { room_code, imageURL } = req.body;
             await deleteImageFromMongo(imageURL, room_code);
             deleteImageFromFirebaseStorage(imageURL);
+            res.status(200).json({ success: 'Image has been deleted' });
         } catch (error) {
             res.status(422).json({ error: error.message });
         }
