@@ -1,113 +1,45 @@
 var express = require('express');
 var router = express.Router();
-const fbAuth = require('../../controller/fbAuth.js');
-const Rooms = require('../../models/room_schema.js');
-const Image = require('../../models/image_schema.js');
-const Room = require('../../models/room_schema.js');
+const fbAuth = require('../../../controller/fbAuth.js');
+const Rooms = require('../../../models/room_schema.js');
+const Image = require('../../../models/image_schema.js');
+const { getStorage, ref, deleteObject } = require('firebase/storage');
+const Room = require('../../../models/room_schema.js');
 
-const deleteImageFromImages = async (imageID) => {
-    try {
-        let result = await Image.deleteOne({ _id: imageID })
-            .exec()
-            .then((result) => {
-                return result;
-            });
-        return result.deletedCount;
-    } catch (err) {
-        throw err;
-    }
-};
-
-const getRoom = async (room_code) => {
-    return new Promise((resolve, reject) => {
-        var rooms = Room.findOne({ room_code: room_code })
-            .exec()
-            .then((rooms) => {
-                resolve(rooms);
-            })
-            .catch(reject);
-    });
-};
-
-const findRoom = async (room_code) => {
-    try {
-        return await Room.findOne({
-            room_code: room_code
-        })
-            .exec()
-            .then((room) => {
-                return room;
-            });
-    } catch (err) {
-        throw err;
-    }
-};
-
-const deleteImageFromRoom = async (imageID, room_code) => {
-    try {
-        const { pictures } = await findRoom(room_code);
-
-        const newPictures = pictures.filter(function (id) {
-            return id != imageID;
-        });
-
-        const updateParams = { pictures: newPictures };
-        const result = await Room.updateOne(
-            { room_code: room_code },
-            updateParams,
-            {
-                new: true
-            }
-        )
-            .exec()
-            .then((result) => {
-                return result;
-            });
-        return result;
-    } catch (err) {
-        throw err;
-    }
-};
-
-const getImage = async (imageURL) => {
+const deleteImageFromMongo = async (imageURL, room_code) => {
     try {
         //find image with imageURL
-        const image = await Image.findOne({
-            imageURL: imageURL
+        var image = await Image.findOne({ imageURL: imageURL }).exec();
+        var room = await Room.findOne({ room_code: room_code }).exec();
+        console.log('room : ' + room.pictures);
+        var pictures = room['pictures'];
+        var indexOfImage = pictures.indexOf(image._id);
+
+        pictures.splice(indexOfImage, 1);
+        room.updateOne({
+            pictures: pictures,
+            num_of_pics: room.num_of_pics - 1
         }).exec();
-        return image._id;
+        image.deleteOne().exec();
     } catch (err) {
         throw err;
     }
 };
 
-const deleteImage = async (room_code, imageURL) => {
+const deleteImageFromFirebaseStorage = async (imageURL) => {
     try {
-        const imageID = await getImage(imageURL);
-        if ((await deleteImageFromImages(imageID)) > 0) {
-            const { msg } = await deleteImageFromRoom(imageID, room_code);
-            return msg.modifiedCount;
-        } else {
-            return 0;
-        }
+        const storage = getStorage();
+        const storageRef = ref(storage, imageURL);
+        deleteObject(storageRef)
+            .then(() => {
+                console.log('object deleted from this url: ' + storageRef);
+                return true;
+            })
+            .catch((error) => {
+                throw error;
+            });
     } catch (err) {
         throw err;
-    }
-};
-
-const manageOutput = (res, result) => {
-    if (result == 1) {
-        res.status(200).json({
-            successful: 'image has been deleted'
-        });
-    } else if (result == 2) {
-        res.status(500).json({
-            unsuccessful: 'image not found or insucfficient permission'
-        });
-    } else {
-        res.status(500).json({
-            error: error
-        });
     }
 };
 
@@ -115,15 +47,13 @@ router.delete('/', fbAuth, async function (req, res, next) {
     if (req.user) {
         try {
             var { room_code, imageURL } = req.body;
-            const result = await deleteImage(room_code, imageURL);
-            if (result == 1) {
-                res.status(200).json({ msg: result });
-            } else {
-                res.status(500).json({ error: error.message });
-            }
+            await deleteImageFromMongo(imageURL, room_code);
+            deleteImageFromFirebaseStorage(imageURL);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(422).json({ error: error.message });
         }
+
+        res.status(200).json({ success: 'Image has been deleted' });
     }
 });
 
