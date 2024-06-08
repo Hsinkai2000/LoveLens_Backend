@@ -3,30 +3,43 @@ var router = express.Router();
 const fbAuth = require('../../../controller/fbAuth.js');
 const Rooms = require('../../../models/room_schema.js');
 const Image = require('../../../models/image_schema.js');
+const { getStorage, ref, deleteObject } = require('firebase/storage');
+const Room = require('../../../models/room_schema.js');
 
-const deleteImage = async (room_code, imageURL) => {
+const deleteImageFromMongo = async (imageURL, room_code) => {
     try {
         //find image with imageURL
-        const image = Image.findOne({ imageURL: imageURL });
-        console.log('image: ' + image);
+        var image = await Image.findOne({ imageURL: imageURL }).exec();
+        var room = await Room.findOne({ room_code: room_code }).exec();
+        console.log('room : ' + room.pictures);
+        var pictures = room['pictures'];
+        var indexOfImage = pictures.indexOf(image._id);
+
+        pictures.splice(indexOfImage, 1);
+        room.updateOne({
+            pictures: pictures,
+            num_of_pics: room.num_of_pics - 1
+        }).exec();
+        image.deleteOne().exec();
     } catch (err) {
         throw err;
     }
 };
 
-const manageOutput = (res, result) => {
-    if (result == 1) {
-        res.status(200).json({
-            successful: 'image has been deleted'
-        });
-    } else if (result == 2) {
-        res.status(500).json({
-            unsuccessful: 'image not found or insucfficient permission'
-        });
-    } else {
-        res.status(500).json({
-            error: error
-        });
+const deleteImageFromFirebaseStorage = async (imageURL) => {
+    try {
+        const storage = getStorage();
+        const storageRef = ref(storage, imageURL);
+        deleteObject(storageRef)
+            .then(() => {
+                console.log('object deleted from this url: ' + storageRef);
+                return true;
+            })
+            .catch((error) => {
+                throw error;
+            });
+    } catch (err) {
+        throw err;
     }
 };
 
@@ -34,11 +47,13 @@ router.delete('/', fbAuth, async function (req, res, next) {
     if (req.user) {
         try {
             var { room_code, imageURL } = req.body;
-            const result = await deleteImage(room_code, imageURL);
-            await manageOutput(res, result);
+            await deleteImageFromMongo(imageURL, room_code);
+            deleteImageFromFirebaseStorage(imageURL);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(422).json({ error: error.message });
         }
+
+        res.status(200).json({ success: 'Image has been deleted' });
     }
 });
 
